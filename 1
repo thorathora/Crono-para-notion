@@ -1,0 +1,475 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRONO Widget de Temporizador</title>
+  <style>
+    :root {
+      --font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-monospace: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+      /* Light Theme (Default) */
+      --bg-color: #f4f7f9;
+      --card-bg-color: #ffffff;
+      --text-color: #333333;
+      --text-secondary-color: #555555;
+      --border-color: #e0e0e0;
+      --input-bg-color: #ffffff;
+      --input-border-color: #cccccc;
+      --primary-color: #007aff;
+      --primary-hover-color: #0056b3;
+      --primary-text-color: #ffffff;
+      --secondary-color: #6c757d; 
+      --secondary-hover-color: #545b62;
+      --secondary-text-color: #ffffff;
+      --tertiary-color: #5c6bc0; 
+      --tertiary-hover-color: #3949ab;
+      --tertiary-text-color: #ffffff;
+      --danger-color: #dc3545;
+      --danger-hover-color: #b02a37;
+      --danger-text-color: #ffffff;
+      --success-color: #28a745;
+      --success-hover-color: #1e7e34;
+      --success-text-color: #ffffff;
+      --warning-color: #ffc107;
+      --warning-hover-color: #d39e00;
+      --warning-text-color: #212529;
+      --button-hover-bg-color: #f0f0f0; /* General button hover, not for colored ones */
+      --button-active-bg-color: #e0e0e0;
+      --shadow-color: rgba(0,0,0,0.08);
+      --icon-color: #555555;
+      --icon-hover-color: #000000;
+      --time-display-bg: #e9ecef;
+      --time-display-text: #212529;
+      --timer-list-active-border-color: var(--primary-color);
+      --timer-list-colored-text-color: #ffffff; /* Text on colored timer buttons */
+      --list-bg-color: var(--input-bg-color);
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --card-bg-color: #1e1e1e;
+      --text-color: #e0e0e0;
+      --text-secondary-color: #b0b0b0;
+      --border-color: #333333;
+      --input-bg-color: #2a2a2a;
+      --input-border-color: #444444;
+      --primary-color: #0a84ff; 
+      --primary-hover-color: #0060df;
+      --secondary-color: #8e8e93;
+      --secondary-hover-color: #6c6c70;
+      --tertiary-color: #7e57c2; 
+      --tertiary-hover-color: #512da8;
+      --danger-color: #ff453a;
+      --danger-hover-color: #d93228;
+      --success-color: #30d158;
+      --success-hover-color: #24a945;
+      --success-text-color: #000000; 
+      --warning-color: #ffd60a;
+      --warning-hover-color: #bfa000;
+      --button-hover-bg-color: #2c2c2e;
+      --button-active-bg-color: #3a3a3c;
+      --shadow-color: rgba(0,0,0,0.3);
+      --icon-color: #b0b0b0;
+      --icon-hover-color: #ffffff;
+      --time-display-bg: #2c2c2e;
+      --time-display-text: #f0f0f0;
+      --timer-list-active-border-color: var(--primary-color);
+      --list-bg-color: var(--input-bg-color);
+    }
+
+    body {
+      font-family: var(--font-sans-serif);
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    #root {
+      width: 100%;
+      max-width: 850px;
+      background-color: var(--card-bg-color);
+      border-radius: 12px;
+      box-shadow: 0 6px 20px var(--shadow-color);
+      padding: 25px;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .app-header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      color: var(--text-color);
+    }
+
+    .theme-toggle-button {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 50%; 
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .theme-toggle-button:hover {
+      background-color: var(--button-hover-bg-color);
+    }
+    .theme-toggle-button svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--icon-color);
+      transition: fill 0.2s ease;
+    }
+     .theme-toggle-button:hover svg {
+       fill: var(--icon-hover-color);
+     }
+
+
+    .app-container {
+      display: flex;
+      gap: 25px;
+    }
+
+    .sidebar {
+      width: 220px; 
+      min-width: 200px;
+      border-right: 1px solid var(--border-color);
+      padding-right: 25px;
+      transition: border-color 0.3s ease;
+    }
+    .sidebar h2 {
+      font-size: 1.1rem;
+      color: var(--text-secondary-color);
+      margin-top: 0;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .main-content {
+      flex-grow: 1;
+    }
+
+    .timer-creation-area {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .timer-creation-area input {
+      flex-grow: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--input-border-color);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background-color: var(--input-bg-color);
+      color: var(--text-color);
+      transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+    }
+    .timer-creation-area input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--primary-color-transparent, rgba(0,122,255,0.3));
+    }
+    
+    .btn-icon {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--icon-color);
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+    .btn-icon:hover {
+      background-color: var(--button-hover-bg-color);
+      color: var(--icon-hover-color);
+      border-color: var(--primary-color); /* Default hover border highlight */
+    }
+    .btn-icon:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: transparent !important; /* Ensure disabled state overrides colored button styles */
+      border-color: var(--border-color) !important;
+      color: var(--text-secondary-color) !important;
+    }
+    .btn-icon.btn-add-timer {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: var(--primary-text-color);
+    }
+    .btn-icon.btn-add-timer:hover {
+      background-color: var(--primary-hover-color);
+      border-color: var(--primary-hover-color);
+      color: var(--primary-text-color);
+    }
+
+
+    .timer-list button {
+      display: block;
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      text-align: left;
+      /* background-color will be set by inline style */
+      border: 2px solid transparent; /* For consistent sizing with active state */
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--timer-list-colored-text-color); /* Default to white for colored buttons */
+      transition: filter 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      font-weight: 500;
+      box-sizing: border-box; 
+    }
+
+    .timer-list button:hover {
+      filter: brightness(110%); /* Slightly brighten the custom color on hover */
+    }
+
+    .timer-list button.active {
+      border: 2px solid var(--timer-list-active-border-color);
+      font-weight: 600;
+      box-shadow: inset 0 0 0 2px var(--card-bg-color), 0 0 0 1px var(--timer-list-active-border-color); /* Inner shadow to make border pop */
+      filter: brightness(100%); /* Ensure active state is not overly bright from hover */
+    }
+    .timer-list button.active:hover {
+       filter: brightness(100%); /* Keep active state brightness consistent on hover */
+    }
+
+
+    .active-timer-area h2 {
+      margin-top: 0;
+      font-size: 1.75rem; 
+      color: var(--text-color);
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .time-display {
+      font-family: var(--font-monospace);
+      font-size: 3.2rem; 
+      margin-bottom: 25px;
+      color: var(--time-display-text);
+      text-align: center;
+      padding: 15px 20px;
+      background-color: var(--time-display-bg);
+      border-radius: 8px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: center; 
+    }
+    
+    .controls .btn-icon { 
+        padding: 10px 12px; 
+    }
+
+    .controls .btn-icon svg {
+        width: 18px; 
+        height: 18px;
+    }
+
+    .controls .btn-start, .controls .btn-resume {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+        color: var(--success-text-color);
+    }
+    .controls .btn-start:hover, .controls .btn-resume:hover {
+        background-color: var(--success-hover-color);
+        border-color: var(--success-hover-color);
+        color: var(--success-text-color);
+    }
+     .controls .btn-pause {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+        color: var(--warning-text-color);
+    }
+    .controls .btn-pause:hover {
+        background-color: var(--warning-hover-color);
+        border-color: var(--warning-hover-color);
+        color: var(--warning-text-color);
+    }
+     .controls .btn-reset, .controls .btn-delete {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+        color: var(--danger-text-color);
+    }
+    .controls .btn-reset:hover, .controls .btn-delete:hover {
+        background-color: var(--danger-hover-color);
+        border-color: var(--danger-hover-color);
+        color: var(--danger-text-color);
+    }
+    .controls .btn-register-total {
+        background-color: var(--tertiary-color);
+        border-color: var(--tertiary-color);
+        color: var(--tertiary-text-color);
+    }
+    .controls .btn-register-total:hover {
+        background-color: var(--tertiary-hover-color);
+        border-color: var(--tertiary-hover-color);
+        color: var(--tertiary-text-color);
+    }
+
+    .registered-totals-area { 
+      margin-bottom: 20px;
+    }
+    .registered-totals-area h3 { 
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      color: var(--text-secondary-color);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-list { 
+      list-style: none;
+      padding: 0;
+      max-height: 180px; 
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      background-color: var(--list-bg-color); 
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+    }
+
+    .data-list li {
+      padding: 10px 8px; 
+      border-bottom: 1px solid var(--border-color);
+      font-family: var(--font-monospace);
+      font-size: 0.9rem;
+      color: var(--text-color);
+      display: flex;
+      justify-content: space-between;
+      transition: border-color 0.3s ease, color 0.3s ease;
+    }
+    .data-list li:last-child {
+      border-bottom: none;
+    }
+    .data-list li .log-index { 
+        color: var(--text-secondary-color);
+        margin-right: 10px;
+    }
+
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        padding-right: 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+      }
+      .timer-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px; 
+      }
+      .timer-list button {
+        width: auto;
+        flex-grow: 1;
+        text-align: center; 
+      }
+       .time-display {
+        font-size: 2.8rem; 
+      }
+      .controls {
+        justify-content: center; 
+      }
+      .app-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+     @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      #root {
+        padding: 15px;
+      }
+      .app-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+      }
+      .app-header h1 {
+        font-size: 1.3rem;
+      }
+      .theme-toggle-button svg {
+          width: 18px;
+          height: 18px;
+      }
+      .time-display {
+        font-size: 2.2rem;
+      }
+       .controls .btn-icon, .timer-creation-area .btn-icon {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+      }
+      .timer-creation-area input {
+        font-size: 0.9rem;
+        padding: 8px 10px;
+      }
+      .active-timer-area h2 {
+        font-size: 1.5rem;
+      }
+      .data-list {
+        max-height: 150px; 
+      }
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/"
+  }
+}
+</script>
+</head>
+<body data-theme="light"> 
+  <div id="root"></div>
+  <script type="module" src="index.tsx"></script>
+</body>
+</html>
